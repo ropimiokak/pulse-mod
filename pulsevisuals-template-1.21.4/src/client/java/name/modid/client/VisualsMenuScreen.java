@@ -38,3 +38,15 @@ public class VisualsMenuScreen extends Screen {
     @Override
     public boolean mouseReleased(double mX, double mY, int b) { draggingElement = null; return super.mouseReleased(mX, mY, b); }
 }
+@Override
+    public boolean mouseClicked(double mX, double mY, int b) {
+        // Если нажал правой кнопкой (b == 1) на кнопку KillAura
+        if (b == 1 && isOver(mX, mY, Modules.auraX, Modules.auraY, 100, 20)) {
+            // Здесь мы будем открывать мини-окно с настройками AuraMode и Range
+            // Пока просто переключаем режим для теста:
+            Modules.auraMode = Modules.auraMode.equals("Legit") ? "FT" : "Legit";
+            return true;
+        }
+        // ... старый код левой кнопки ...
+        return super.mouseClicked(mX, mY, b);
+    }
