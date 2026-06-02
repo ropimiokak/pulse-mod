@@ -62,8 +62,6 @@ public class VisualsMenuScreen extends Screen {
         if (button == 0) {
             Minecraft client = Minecraft.getInstance();
             String serverType = client.isSingleplayer() ? "Singleplayer" : "Multiplayer";
-            
-            // ИСПРАВЛЕНО: убрали вызов getFps(), берём стабильную строку
             String watermarkText = "pulse visuals  |  " + client.getUser().getName() + "  |  " + serverType;
             int hudWidth = client.font.width(watermarkText) + 10;
             
@@ -110,7 +108,8 @@ public class VisualsMenuScreen extends Screen {
             int pX = startX + (i * (panelWidth + panelGap));
             guiGraphics.fill(pX, startY, pX + panelWidth, startY + panelHeight, 0xD512131C);
             guiGraphics.fill(pX, startY + 18, pX + panelWidth, startY + 19, 0xFF2A2C3D);
-            guiGraphics.drawCenteredString(this.font, categories[i], pX + (panelWidth / 2), startY + 5, 0xFFFFFFFF);
+            // ИСПРАВЛЕНО: Текст обернут в Component.literal
+            guiGraphics.drawCenteredString(this.font, Component.literal(categories[i]), pX + (panelWidth / 2), startY + 5, 0xFFFFFFFF);
         }
     }
 }
