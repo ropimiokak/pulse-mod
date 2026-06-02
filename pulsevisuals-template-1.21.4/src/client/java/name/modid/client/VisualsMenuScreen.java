@@ -57,16 +57,15 @@ public class VisualsMenuScreen extends Screen {
         ).bounds(visualsX + 5, startY + 25, 90, 18).build());
     }
 
-    // ЛОГИКА ПЕРЕМЕЩЕНИЯ ХАБА МЫШКОЙ
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) { // Левый клик мыши
+        if (button == 0) {
             Minecraft client = Minecraft.getInstance();
             String serverType = client.isSingleplayer() ? "Singleplayer" : "Multiplayer";
-            String watermarkText = "pulse visuals  |  " + client.getUser().getName() + "  |  " + Minecraft.getFps() + " fps  |  " + serverType;
+            // ИСПРАВЛЕНО: заменено на client.getFps()
+            String watermarkText = "pulse visuals  |  " + client.getUser().getName() + "  |  " + client.getFps() + " fps  |  " + serverType;
             int hudWidth = client.font.width(watermarkText) + 10;
             
-            // Проверяем, попал ли клик по топ-бару хаба
             if (mouseX >= Modules.hudX && mouseX <= Modules.hudX + hudWidth &&
                 mouseY >= Modules.hudY && mouseY <= Modules.hudY + 17) {
                 this.draggingHud = true;
