@@ -1,52 +1,40 @@
 package name.modid;
 
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 public class VisualsMenuScreen extends Screen {
-    private String draggingElement = null;
-
     public VisualsMenuScreen() { super(Component.literal("ClickGUI")); }
 
     @Override
-    public boolean mouseClicked(double mX, double mY, int b) {
-        if (b == 0) {
-            // Проверка попадания мышки в области элементов
-            if (isOver(mX, mY, Modules.hudX, Modules.hudY, 100, 20)) draggingElement = "HUD";
-            else if (isOver(mX, mY, Modules.armorX, Modules.armorY, 80, 20)) draggingElement = "ARMOR";
-            else if (isOver(mX, mY, Modules.potionX, Modules.potionY, 100, 20)) draggingElement = "POTION";
-            else if (isOver(mX, mY, Modules.fpsX, Modules.fpsY, 50, 20)) draggingElement = "FPS";
-            else if (isOver(mX, mY, Modules.xyzX, Modules.xyzY, 100, 20)) draggingElement = "XYZ";
+    public void render(GuiGraphics gui, int mX, int mY, float delta) {
+        super.render(gui, mX, mY, delta);
+        // Рисуем кнопку KillAura
+        gui.fill(50, 50, 150, 70, 0xFF222222);
+        gui.drawString(this.font, Component.literal("KillAura"), 55, 55, 0xFFFFFF);
+
+        // Если открыто подменю настроек - рисуем его
+        if (Modules.showingSettings) {
+            gui.fill(Modules.settingsX, Modules.settingsY, Modules.settingsX + 100, Modules.settingsY + 60, 0xFF333333);
+            gui.drawString(this.font, Component.literal("Mode: " + Modules.auraMode), Modules.settingsX + 5, Modules.settingsY + 5, 0x00FF00);
+            gui.drawString(this.font, Component.literal("Range: " + Modules.auraRange), Modules.settingsX + 5, Modules.settingsY + 25, 0xFFFFFF);
         }
-        return super.mouseClicked(mX, mY, b);
-    }
-
-    private boolean isOver(double mX, double mY, int x, int y, int w, int h) {
-        return mX >= x && mX <= x + w && mY >= y && mY <= y + h;
     }
 
     @Override
-    public boolean mouseDragged(double mX, double mY, int b, double dX, double dY) {
-        if ("HUD".equals(draggingElement)) { Modules.hudX = (int)mX; Modules.hudY = (int)mY; }
-        else if ("ARMOR".equals(draggingElement)) { Modules.armorX = (int)mX; Modules.armorY = (int)mY; }
-        else if ("POTION".equals(draggingElement)) { Modules.potionX = (int)mX; Modules.potionY = (int)mY; }
-        else if ("FPS".equals(draggingElement)) { Modules.fpsX = (int)mX; Modules.fpsY = (int)mY; }
-        else if ("XYZ".equals(draggingElement)) { Modules.xyzX = (int)mX; Modules.xyzY = (int)mY; }
-        return super.mouseDragged(mX, mY, b, dX, dY);
-    }
-
-    @Override
-    public boolean mouseReleased(double mX, double mY, int b) { draggingElement = null; return super.mouseReleased(mX, mY, b); }
-}
-@Override
     public boolean mouseClicked(double mX, double mY, int b) {
-        // Если нажал правой кнопкой (b == 1) на кнопку KillAura
-        if (b == 1 && isOver(mX, mY, Modules.auraX, Modules.auraY, 100, 20)) {
-            // Здесь мы будем открывать мини-окно с настройками AuraMode и Range
-            // Пока просто переключаем режим для теста:
-            Modules.auraMode = Modules.auraMode.equals("Legit") ? "FT" : "Legit";
+        // Правая кнопка (b == 1) на кнопку KillAura
+        if (b == 1 && mX >= 50 && mX <= 150 && mY >= 50 && mY <= 70) {
+            Modules.showingSettings = !Modules.showingSettings;
+            Modules.settingsX = (int)mX;
+            Modules.settingsY = (int)mY;
             return true;
         }
-        // ... старый код левой кнопки ...
+        // Левая кнопка для смены режима в подменю
+        if (b == 0 && Modules.showingSettings) {
+            Modules.auraMode = Modules.auraMode.equals("Legit") ? "FT" : "Legit";
+        }
         return super.mouseClicked(mX, mY, b);
     }
+}
