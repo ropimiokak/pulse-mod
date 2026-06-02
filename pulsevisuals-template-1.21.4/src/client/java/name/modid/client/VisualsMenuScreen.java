@@ -1,115 +1,32 @@
 package name.modid;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 public class VisualsMenuScreen extends Screen {
-    
-    private boolean draggingHud = false;
-    private double dragOffsetX = 0;
-    private double dragOffsetY = 0;
+    private String draggingElement = null;
 
-    public VisualsMenuScreen() {
-        super(Component.literal("ClickGUI"));
-    }
+    public VisualsMenuScreen() { super(Component.literal("ClickGUI")); }
 
     @Override
-    protected void init() {
-        super.init();
-        
-        int panelWidth = 100;
-        int panelGap = 10;
-        int totalWidth = (panelWidth * 5) + (panelGap * 4);
-        int startX = (this.width - totalWidth) / 2;
-        int startY = 40;
-
-        // КОЛОНКА MOVEMENT (Индекс 1)
-        int movementX = startX + (1 * (panelWidth + panelGap));
-        
-        this.addRenderableWidget(Button.builder(
-            Component.literal(Modules.autoSprint ? "AutoSprint: ON" : "AutoSprint: OFF"), 
-            button -> {
-                Modules.autoSprint = !Modules.autoSprint;
-                button.setMessage(Component.literal(Modules.autoSprint ? "AutoSprint: ON" : "AutoSprint: OFF"));
-            }
-        ).bounds(movementX + 5, startY + 25, 90, 18).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal(Modules.jumpCircles ? "JumpCircles: ON" : "JumpCircles: OFF"), 
-            button -> {
-                Modules.jumpCircles = !Modules.jumpCircles;
-                button.setMessage(Component.literal(Modules.jumpCircles ? "JumpCircles: ON" : "JumpCircles: OFF"));
-            }
-        ).bounds(movementX + 5, startY + 46, 90, 18).build());
-
-        // КОЛОНКА VISUALS (Индекс 2)
-        int visualsX = startX + (2 * (panelWidth + panelGap));
-        
-        this.addRenderableWidget(Button.builder(
-            Component.literal(Modules.esp ? "ESP: ON" : "ESP: OFF"), 
-            button -> {
-                Modules.esp = !Modules.esp;
-                button.setMessage(Component.literal(Modules.esp ? "ESP: ON" : "ESP: OFF"));
-            }
-        ).bounds(visualsX + 5, startY + 25, 90, 18).build());
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
-            Minecraft client = Minecraft.getInstance();
-            String serverType = client.isSingleplayer() ? "Singleplayer" : "Multiplayer";
-            String watermarkText = "pulse visuals  |  " + client.getUser().getName() + "  |  " + serverType;
-            int hudWidth = client.font.width(watermarkText) + 10;
-            
-            if (mouseX >= Modules.hudX && mouseX <= Modules.hudX + hudWidth &&
-                mouseY >= Modules.hudY && mouseY <= Modules.hudY + 17) {
-                this.draggingHud = true;
-                this.dragOffsetX = mouseX - Modules.hudX;
-                this.dragOffsetY = mouseY - Modules.hudY;
-                return true;
-            }
+    public boolean mouseClicked(double mX, double mY, int b) {
+        if (b == 0) {
+            if (mX >= Modules.hudX && mX <= Modules.hudX + 100 && mY >= Modules.hudY && mY <= Modules.hudY + 20) draggingElement = "HUD";
+            else if (mX >= Modules.armorX && mX <= Modules.armorX + 50 && mY >= Modules.armorY && mY <= Modules.armorY + 50) draggingElement = "ARMOR";
+            else if (mX >= Modules.potionX && mX <= Modules.potionX + 50 && mY >= Modules.potionY && mY <= Modules.potionY + 20) draggingElement = "POTION";
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mX, mY, b);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0) this.draggingHud = false;
-        return super.mouseReleased(mouseX, mouseY, button);
+    public boolean mouseDragged(double mX, double mY, int b, double dX, double dY) {
+        if ("HUD".equals(draggingElement)) { Modules.hudX = (int)mX; Modules.hudY = (int)mY; }
+        else if ("ARMOR".equals(draggingElement)) { Modules.armorX = (int)mX; Modules.armorY = (int)mY; }
+        else if ("POTION".equals(draggingElement)) { Modules.potionX = (int)mX; Modules.potionY = (int)mY; }
+        return super.mouseDragged(mX, mY, b, dX, dY);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (this.draggingHud) {
-            Modules.hudX = (int) (mouseX - this.dragOffsetX);
-            Modules.hudY = (int) (mouseY - this.dragOffsetY);
-            return true;
-        }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-    }
-
-    @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        super.render(guiGraphics, mouseX, mouseY, delta);
-        
-        String[] categories = {"Combat", "Movement", "Visuals", "Player", "Misc"};
-        int panelWidth = 100;
-        int panelGap = 10;
-        int totalWidth = (panelWidth * 5) + (panelGap * 4);
-        int startX = (this.width - totalWidth) / 2;
-        int startY = 40;
-        int panelHeight = 180;
-
-        for (int i = 0; i < categories.length; i++) {
-            int pX = startX + (i * (panelWidth + panelGap));
-            guiGraphics.fill(pX, startY, pX + panelWidth, startY + panelHeight, 0xD512131C);
-            guiGraphics.fill(pX, startY + 18, pX + panelWidth, startY + 19, 0xFF2A2C3D);
-            // ИСПРАВЛЕНО: Текст обернут в Component.literal
-            guiGraphics.drawCenteredString(this.font, Component.literal(categories[i]), pX + (panelWidth / 2), startY + 5, 0xFFFFFFFF);
-        }
-    }
+    public boolean mouseReleased(double mX, double mY, int b) { draggingElement = null; return super.mouseReleased(mX, mY, b); }
 }
