@@ -24,12 +24,13 @@ public class HudRenderer implements HudRenderCallback {
 
         // 1. ТОП БАР
         String serverType = client.isSingleplayer() ? "Singleplayer" : "Multiplayer";
-        // ИСПРАВЛЕНО: заменено на client.getFps()
-        String watermarkText = "pulse visuals  |  " + client.getUser().getName() + "  |  " + client.getFps() + " fps  |  " + serverType;
+        
+        // ИСПРАВЛЕНО: Безопасное получение FPS без вызова ломающихся методов
+        String fpsString = client.fpsString.split(" ")[0]; 
+        String watermarkText = "pulse visuals  |  " + client.getUser().getName() + "  |  " + fpsString + " fps  |  " + serverType;
         int watermarkWidth = client.font.width(watermarkText);
         
         guiGraphics.fill(hX, hY, hX + 10 + watermarkWidth, hY + 17, backgroundColor);
-        // ИСПРАВЛЕНО: убран несовместимый параметр false в конце
         guiGraphics.drawString(client.font, watermarkText, hX + 5, hY + 5, 0xFFFFFFFF);
 
         // 2. ЧАСЫ
