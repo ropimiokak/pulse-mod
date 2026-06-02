@@ -13,3 +13,5 @@ public class Modules {
     // Настройки KillAura (обходы)
     public static double auraRange = 3.2;
 }
+public static int fpsX = 10, fpsY = 200;
+public static int xyzX = 10, xyzY = 230;
