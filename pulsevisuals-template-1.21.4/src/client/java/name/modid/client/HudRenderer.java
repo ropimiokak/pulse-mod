@@ -2,94 +2,40 @@ package name.modid;
 
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import net.minecraft.world.item.ItemStack;
 
 public class HudRenderer implements HudRenderCallback {
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
-
     @Override
-    public void onHudRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
-        Minecraft client = Minecraft.getInstance();
-        
-        if (client.options.hideGui || client.player == null) return;
+    public void onHudRender(GuiGraphics gui, float delta) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.hideGui || mc.player == null) return;
 
-        int backgroundColor = 0xD50A111E; 
-        int activeKeyColor = 0x9000FFFF; 
+        // 1. Отрисовка текста FPS (Классика)
+        String fpsText = "FPS: " + mc.getFps();
+        gui.drawString(mc.font, fpsText, Modules.hudX, Modules.hudY, 0xFFFFFF);
 
-        int hX = Modules.hudX;
-        int hY = Modules.hudY;
-
-        // 1. ТОП БАР
-        String serverType = client.isSingleplayer() ? "Singleplayer" : "Multiplayer";
-        String watermarkText = "pulse visuals  |  " + client.getUser().getName() + "  |  " + serverType;
-        int watermarkWidth = client.font.width(watermarkText);
-        
-        guiGraphics.fill(hX, hY, hX + 10 + watermarkWidth, hY + 17, backgroundColor);
-        guiGraphics.drawString(client.font, Component.literal(watermarkText), hX + 5, hY + 5, 0xFFFFFFFF);
-
-        // 2. ЧАСЫ
-        String timeText = "Time: " + LocalTime.now().format(TIME_FORMAT);
-        int timeWidth = client.font.width(timeText);
-        
-        guiGraphics.fill(hX, hY + 22, hX + 10 + timeWidth, hY + 39, backgroundColor);
-        guiGraphics.drawString(client.font, Component.literal(timeText), hX + 5, hY + 26, 0xFFFFFFFF);
-
-        // 3. KEYSTROKES (КЛАВИШИ)
-        int keySize = 18;
-        int gap = 3;
-        int kX = hX;
-        int kY = hY + 44;
-
-        // W
-        boolean wPressed = client.options.keyUp.isDown();
-        guiGraphics.fill(kX + keySize + gap, kY, kX + (keySize * 2) + gap, kY + keySize, wPressed ? activeKeyColor : backgroundColor);
-        guiGraphics.drawCenteredString(client.font, Component.literal("W"), kX + keySize + gap + (keySize / 2), kY + 5, wPressed ? 0xFF000000 : 0xFFFFFFFF);
-
-        // A
-        boolean aPressed = client.options.keyLeft.isDown();
-        guiGraphics.fill(kX, kY + keySize + gap, kX + keySize, kY + (keySize * 2) + gap, aPressed ? activeKeyColor : backgroundColor);
-        guiGraphics.drawCenteredString(client.font, Component.literal("A"), kX + (keySize / 2), kY + keySize + gap + 5, aPressed ? 0xFF000000 : 0xFFFFFFFF);
-
-        // S
-        boolean sPressed = client.options.keyDown.isDown();
-        guiGraphics.fill(kX + keySize + gap, kY + keySize + gap, kX + (keySize * 2) + gap, kY + (keySize * 2) + gap, sPressed ? activeKeyColor : backgroundColor);
-        guiGraphics.drawCenteredString(client.font, Component.literal("S"), kX + keySize + gap + (keySize / 2), kY + keySize + gap + 5, sPressed ? 0xFF000000 : 0xFFFFFFFF);
-
-        // D
-        boolean dPressed = client.options.keyRight.isDown();
-        guiGraphics.fill(kX + (keySize * 2) + (gap * 2), kY + keySize + gap, kX + (keySize * 3) + (gap * 2), kY + (keySize * 2) + gap, dPressed ? activeKeyColor : backgroundColor);
-        guiGraphics.drawCenteredString(client.font, Component.literal("D"), kX + (keySize * 2) + (gap * 2) + (keySize / 2), kY + keySize + gap + 5, dPressed ? 0xFF000000 : 0xFFFFFFFF);
-
-        // SPACE
-        boolean spacePressed = client.options.keyJump.isDown();
-        guiGraphics.fill(kX, kY + (keySize * 2) + (gap * 2), kX + (keySize * 3) + (gap * 2), kY + (keySize * 2) + (gap * 2) + 12, spacePressed ? activeKeyColor : backgroundColor);
-        guiGraphics.drawCenteredString(client.font, Component.literal("SPACE"), kX + ((keySize * 3 + gap * 2) / 2), kY + (keySize * 2) + (gap * 2) + 2, spacePressed ? 0xFF000000 : 0xFFFFFFFF);
-
-        // 4. СПИСОК АКТИВНЫХ МОДУЛЕЙ
-        int listX = kX + (keySize * 3) + (gap * 2) + 10;
-        int listY = kY;
-        
-        guiGraphics.fill(listX, listY, listX + 80, listY + 15, backgroundColor);
-        guiGraphics.drawString(client.font, Component.literal("Модули"), listX + 4, listY + 4, 0x9000FFFF);
-        
-        int offset = 18;
-        if (Modules.autoSprint) {
-            guiGraphics.fill(listX, listY + offset, listX + 80, listY + offset + 14, backgroundColor);
-            guiGraphics.drawString(client.font, Component.literal("> AutoSprint"), listX + 6, listY + offset + 3, 0xFFFFFFFF);
-            offset += 16;
+        // 2. Отрисовка ArmorHUD (Броня по слотам)
+        int ax = Modules.armorX;
+        int ay = Modules.armorY;
+        for (int i = 0; i < 4; i++) {
+            ItemStack stack = mc.player.getInventory().armor.get(i);
+            if (!stack.isEmpty()) {
+                gui.renderItem(stack, ax + (i * 20), ay);
+            }
         }
-        if (Modules.jumpCircles) {
-            guiGraphics.fill(listX, listY + offset, listX + 80, listY + offset + 14, backgroundColor);
-            guiGraphics.drawString(client.font, Component.literal("> JumpCircles"), listX + 6, listY + offset + 3, 0xFFFFFFFF);
-            offset += 16;
-        }
-        if (Modules.esp) {
-            guiGraphics.fill(listX, listY + offset, listX + 80, listY + offset + 14, backgroundColor);
-            guiGraphics.drawString(client.font, Component.literal("> ESP"), listX + 6, listY + offset + 3, 0xFFFFFFFF);
-        }
+
+        // 3. Отрисовка PotionHUD (Список эффектов)
+        int px = Modules.potionX;
+        int py = Modules.potionY;
+        mc.player.getActiveEffects().forEach(effect -> {
+            String name = effect.getEffect().value().getDescriptionId();
+            gui.drawString(mc.font, Component.literal(name), px, py, 0xFF00FF); // Розовый цвет эффектов
+        });
+        
+        // 4. Координаты игрока (XYZ)
+        String pos = String.format("XYZ: %.0f, %.0f, %.0f", mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        gui.drawString(mc.font, pos, 10, 200, 0x00FF00); // Зеленые координаты
     }
 }
