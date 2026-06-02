@@ -62,8 +62,9 @@ public class VisualsMenuScreen extends Screen {
         if (button == 0) {
             Minecraft client = Minecraft.getInstance();
             String serverType = client.isSingleplayer() ? "Singleplayer" : "Multiplayer";
-            // ИСПРАВЛЕНО: заменено на client.getFps()
-            String watermarkText = "pulse visuals  |  " + client.getUser().getName() + "  |  " + client.getFps() + " fps  |  " + serverType;
+            
+            // ИСПРАВЛЕНО: убрали вызов getFps(), берём стабильную строку
+            String watermarkText = "pulse visuals  |  " + client.getUser().getName() + "  |  " + serverType;
             int hudWidth = client.font.width(watermarkText) + 10;
             
             if (mouseX >= Modules.hudX && mouseX <= Modules.hudX + hudWidth &&
