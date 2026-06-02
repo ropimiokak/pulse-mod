@@ -19,7 +19,7 @@
 			"name.modid.Pulsevisuals"
 		],
 		"client": [
-			"name.modid.client.PulsevisualsClient"
+			"name.modid.PulsevisualsClient"
 		]
 	},
 	"mixins": [
